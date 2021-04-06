@@ -3,38 +3,39 @@ name: General
 on: push
 
 jobs:
-  #  test-semaphore:
-  #    runs-on: ubuntu-latest
-  #    steps:
-  #      - uses: actions/checkout@v2
-  #      - name: get compiler
-  #        run: sudo wget https://netcologne.dl.sourceforge.net/project/d-apt/files/d-apt.list -O /etc/apt/sources.list.d/d-apt.list && sudo apt-get update --allow-insecure-repositories && sudo apt-get -y --allow-unauthenticated install --reinstall d-apt-keyring && sudo apt-get update && sudo apt-get install dmd-compiler dub
-  #      - name: test semaphore
-  #        run: rdmd semaphore/semaphore.d
+  test-semaphore:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: get compiler
+        run: sudo wget https://netcologne.dl.sourceforge.net/project/d-apt/files/d-apt.list -O /etc/apt/sources.list.d/d-apt.list && sudo apt-get update --allow-insecure-repositories && sudo apt-get -y --allow-unauthenticated install --reinstall d-apt-keyring && sudo apt-get update && sudo apt-get install dmd-compiler dub
+      - name: test semaphore
+        run: rdmd semaphore/semaphore.d
 
-  #  test-conditionvariable:
-  #    runs-on: ubuntu-latest
-  #    steps:
-  #        - uses: actions/checkout@v2
-  #        - name: get compiler
-  #          run: sudo wget https://netcologne.dl.sourceforge.net/project/d-apt/files/d-apt.list -O /etc/apt/sources.list.d/d-apt.list && sudo apt-get update --allow-insecure-repositories && sudo apt-get -y --allow-unauthenticated install --reinstall d-apt-keyring && sudo apt-get update && sudo apt-get install dmd-compiler dub
-  #        - name: test conditionvariable
-  #          run: rdmd conditionvariable/condvar.d 
+  test-conditionvariable:
+    runs-on: ubuntu-latest
+    steps:
+        - uses: actions/checkout@v2
+        - name: get compiler
+          run: sudo wget https://netcologne.dl.sourceforge.net/project/d-apt/files/d-apt.list -O /etc/apt/sources.list.d/d-apt.list && sudo apt-get update --allow-insecure-repositories && sudo apt-get -y --allow-unauthenticated install --reinstall d-apt-keyring && sudo apt-get update && sudo apt-get install dmd-compiler dub
+        - name: test conditionvariable
+          run: rdmd conditionvariable/condvar.d 
 
-  #  test-protectedobjects:
-  #    runs-on: ubuntu-latest
-  #    steps:
-  #      - uses: actions/checkout@v2
-  #      - name: get compiler
-  #        run: sudo apt update -y && sudo apt install gnat
-  #      - name: compile ada project
-  #        run: cd protectedobject && gnatmake protectobj.adb
-  #      - name: run binary
-  #        run: protectedobject/protectobj
+  test-protectedobjects:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: get compiler
+        run: sudo apt update -y && sudo apt install gnat
+      - name: compile ada project
+        run: cd protectedobject && gnatmake protectobj.adb
+      - name: run binary
+        run: protectedobject/protectobj
 
   test-messagepassing:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-go@v2
+      - name: test message passing
         run: go run messagepassing/request.go
