@@ -32,10 +32,18 @@ jobs:
       - name: run binary
         run: protectedobject/protectobj
 
-  test-messagepassing:
+  test-requests:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-go@v2
-      - name: test message passing
+      - name: test message passing, request
         run: go run messagepassing/request.go
+
+  test-priorityselect:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-go@v2
+      - name: test message passing, priority select
+        run: go run messagepassing/priorityselect.go
