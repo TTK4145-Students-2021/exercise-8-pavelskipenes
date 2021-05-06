@@ -20,7 +20,7 @@ class Resource(T)
     {
         T value;
         Semaphore resourceLock; // mutex for accessing this resource
-        Semaphore[2] sems; // sem[0] high priority, sem[1] low priority. content is id.
+        Semaphore[2] sems; // sem[0] low priority, sem[1] high priority.
         int[2] numWaiting; // how many waiters are there in each priority group
         bool busy; // true if the resource is busy
     }
@@ -37,6 +37,11 @@ class Resource(T)
     T allocate(int id, int priority)
     {
         resourceLock.wait();
+        if (!id % 2)
+        {
+            priority = 1;
+        }
+
         if (busy)
         {
             resourceLock.notify();
@@ -58,15 +63,15 @@ class Resource(T)
         busy = false;
 
         // alert next in line
-        if (numWaiting[0] > 0)
-        {
-            numWaiting[0]--;
-            sems[0].notify();
-        }
-        else if (numWaiting[1] > 0)
+        if (numWaiting[1] > 0)
         {
             numWaiting[1]--;
             sems[1].notify();
+        }
+        else if (numWaiting[0] > 0)
+        {
+            numWaiting[0]--;
+            sems[0].notify();
         }
 
         resourceLock.notify();
@@ -82,8 +87,9 @@ void main()
     executionStates = new ExecutionState[](10);
 
     auto cfgs = [
-        ResourceUserConfig(0, 0, 1, 1), ResourceUserConfig(1, 0, 3, 1),
-        ResourceUserConfig(2, 1, 5, 1), ResourceUserConfig(0, 1, 10, 2),
+        // id, pri, 
+        ResourceUserConfig(0, 0, 1, 1),  ResourceUserConfig(1, 0, 3, 1),
+        ResourceUserConfig(2, 1, 5, 1),  ResourceUserConfig(0, 1, 10, 2),
         ResourceUserConfig(1, 0, 11, 1), ResourceUserConfig(2, 1, 11, 1),
         ResourceUserConfig(3, 0, 11, 1), ResourceUserConfig(4, 1, 11, 1),
         ResourceUserConfig(5, 0, 11, 1), ResourceUserConfig(6, 1, 11, 1),
@@ -109,29 +115,13 @@ void main()
     auto val = resource.allocate(-1, 0);
 
     assert(val.length == cfgs.length, "Test failed: Did not run all users once");
-    assert(val[0 .. 3] == [0, 1, 2],
-            format("Test 1 failed: Did not run users in ascending order, instead ran %s",
-                val[0 .. 3]));
-
-    assert(val[3] == 0,
-            format("Test 2 failed: Did not run initial (high priority) user, instead ran %s",
-                val[3]));
-    assert(val[4 .. 8].all!("(a & 1) == 0"),
-            format("Test 2 failed: Did not run high priority (even id) users first, instead ran %s",
-                val[4 .. 8]));
-    assert(val[8 .. 12].all!("a & 1"),
-            format("Test 2 failed: Did not run low priority (odd id) users last, instead ran %s",
-                val[8 .. 12]));
-
-    assert(val[12] == 0,
-            format("Test 3 failed: Did not run initial (high priority) user, instead ran %s",
-                val[12]));
-    assert(val[13 .. 18].all!("a >= 1") && val[13 .. 18].all!("a <= 5"),
-            format("Test 3 failed: Did not run high priority users first, instead ran %s",
-                val[13 .. 18]));
-    assert(val[18 .. 20].all!("a >= 6") && val[18 .. 20].all!("a <= 7"),
-            format("Test 3 failed: Did not run low priority users last, instead ran %s",
-                val[18 .. 20]));
+    assert(val[0 .. 3] == [0, 1, 2], format("Test 1 failed: Did not run users in ascending order, instead ran %s", val[0 .. 3]));
+    assert(val[3] == 0, format("Test 2 failed: Did not run initial (high priority) user, instead ran %s", val[3]));
+    assert(val[4 .. 8].all!("(a & 1) == 0"), format("Test 2 failed: Did not run high priority (even id) users first, instead ran %s", val[4 .. 8]));
+    assert(val[8 .. 12].all!("a & 1"), format("Test 2 failed: Did not run low priority (odd id) users last, instead ran %s", val[8 .. 12]));
+    assert(val[12] == 0, format("Test 3 failed: Did not run initial (high priority) user, instead ran %s", val[12]));
+    assert(val[13 .. 18].all!("a >= 1") && val[13 .. 18].all!("a <= 5"), format("Test 3 failed: Did not run high priority users first, instead ran %s", val[13 .. 18]));
+    assert(val[18 .. 20].all!("a >= 6") && val[18 .. 20].all!("a <= 7"), format("Test 3 failed: Did not run low priority users last, instead ran %s", val[18 .. 20]));
     writeln("All tests pass");
 }
 
