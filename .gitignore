@@ -1,3 +1,5 @@
 *.ali
 *.o
 protectobj
+conditionvariable/condvar
+semaphore/semaphore
